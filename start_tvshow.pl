@@ -3,8 +3,9 @@ use Net::UPnP::ControlPoint;
 use Net::UPnP::AV::MediaRenderer;
 use Net::UPnP::ActionResponse;
 use Net::UPnP::AV::MediaServer;
-my $DLNAserver = "GRAPE DLNA";
-my $filename = "city";
+my $DLNAserver = "DLNA"; #regexp name of you local DLNA server 
+my $filename = "city"; #regexp for searching filename
+my $TVname = 'VIERA'; #DLNA device (TV) must contain this string in name, otherwise it will be skipped
 
 my $stopbeforeplay = 1; #will stop/start TV one time
 
@@ -48,7 +49,7 @@ foreach $dev (@dev_list) {
      unless ($dev->getservicebyname('urn:schemas-upnp-org:service:ContentDirectory:1')) {
          next;
      }
-     print $dev->getfriendlyname() . "\n";
+     print now(). "Found ".$dev->getfriendlyname() . "\n";
      if ($dev->getfriendlyname() !~ /$DLNAserver/) {
 	next;
      }
@@ -140,7 +141,7 @@ while (1) {
 	$devNum++;
         my $friendlyname = $dev->getfriendlyname(); 
         print now() . "found [$devNum] : device name: [" . $friendlyname . "] " ;
-	if ($friendlyname !~ /VIER/) { print "skipping this device.\n";next;}
+	if ($friendlyname !~ /$TVname/) { print "skipping this device.\n";next;}
 
         my $renderer = Net::UPnP::AV::MediaRenderer->new();
         $renderer->setdevice($dev);
@@ -175,11 +176,11 @@ EOF
 	 #something wrong
                }
 	  if ($stopbeforeplay == 1) {
- 	    print now() . "device [$devNum] pid $$ stop! \n";
+ 	    print now() . "device [$devNum] pid $$ command: [stop] \n";
 	    $renderer->stop();
 	    $stopbeforeplay = 0;
           }
-	  print now() . "device [$devNum] pid $$ play! $fileid $file \n";sleep 1;
+	  print now() . "device [$devNum] pid $$ command: [play] $fileid $file \n";sleep 1;
           $renderer->play(); 
           $devNum++;
 	  exit;
